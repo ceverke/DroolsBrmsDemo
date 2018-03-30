@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kmodule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://jboss.org/kie/6.0.0/kmodule">
+
+	<kbase name="bankAccountRules" eventProcessingMode="stream"
+		packages="de.adesso.blog.businessrules">
+		<ksession name="accountCostDefinitionSession" default="true" type="stateless"/>
+	</kbase>
+
+</kmodule>

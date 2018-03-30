@@ -1,0 +1,102 @@
+package de.adesso.blog.businessrules;
+
+import de.adesso.blog.model.*;
+
+
+rule "1. Default account maintenance charge: 3.0 Euro per month"
+	when
+		$customer : PrivateCustomer(bankAccount==null) 
+	then
+		BankAccount $bankAccount = new BankAccount();
+		$bankAccount.setCostPerMonth(3.0);
+		$customer.setBankAccount($bankAccount);
+		insert($customer);
+end
+
+rule "1.a Customer needs non online transferals; additional charge 5.0 Euro per month"
+	when
+		$customer : PrivateCustomer(nonOnlineTransferals) 
+	then
+		BankAccount $bankAccount = $customer.getBankAccount();
+		$bankAccount.setCostPerMonth($bankAccount.getCostPerMonth() + 5.0);
+		$customer.setBankAccount($bankAccount);
+		insert($customer);
+end
+
+rule "1.b Customer needs second card; additional charge 4.50 Euro per month"
+	when
+		$customer : PrivateCustomer(secondCard) 
+	then
+		BankAccount $bankAccount = $customer.getBankAccount();
+		$bankAccount.setCostPerMonth($bankAccount.getCostPerMonth() + 4.5);
+		$customer.setBankAccount($bankAccount);
+		insert($customer);
+end
+
+
+
+rule "1.c Customer needs gold card; additional charge 9.90 Euro per month"
+	when
+		$customer : PrivateCustomer(goldCard) 
+	then
+		BankAccount $bankAccount = $customer.getBankAccount();
+		$bankAccount.setCostPerMonth($bankAccount.getCostPerMonth() + 9.9);
+		$customer.setBankAccount($bankAccount);
+		insert($customer);
+		
+end
+
+rule "2.a Customer is employee, overdraft limit is 10% of the monthly salary (with an interest of 10.9%)"
+	when
+		$customer : PrivateCustomer(jobState==JobState.EMPLOYEE) 
+	then
+		BankAccount $bankAccount = $customer.getBankAccount();
+		$bankAccount.setOverdraft($customer.getMonthlySalaray() * 0.1);
+		$bankAccount.setOverdraftInterest(10.9);
+		$customer.setBankAccount($bankAccount);
+		insert($customer);
+end
+
+rule "2.b Customer is student, there is no overdraft limit (and, of course, no interest)"
+	when
+		$customer : PrivateCustomer(jobState==JobState.STUDENT) 
+	then
+		BankAccount $bankAccount = $customer.getBankAccount();
+		$bankAccount.setOverdraft(0.0);
+		$bankAccount.setOverdraftInterest(0.0);
+		$customer.setBankAccount($bankAccount);
+		insert($customer);
+end
+
+rule "2.a Customer is pensioner, overdraft limit is 5% of the monthly salary (with an interest of 6%)"
+	when
+		$customer : PrivateCustomer(jobState==JobState.PENSIONER) 
+	then
+		BankAccount $bankAccount = $customer.getBankAccount();
+		$bankAccount.setOverdraft($customer.getMonthlySalaray() * 0.05);
+		$bankAccount.setOverdraftInterest(6.0);
+		$customer.setBankAccount($bankAccount);
+		insert($customer);
+end
+
+rule "3.a + 3b  Students or persons under 25 yrs (but not both) only pay half of the calculated fee"
+	when
+		$customer : PrivateCustomer((jobState==JobState.STUDENT || calculateAge()<25) && !(
+		jobState==JobState.STUDENT && calculateAge()<25)) 
+	then
+		BankAccount $bankAccount = $customer.getBankAccount();
+		$bankAccount.setCostPerMonth($bankAccount.getCostPerMonth()/2);
+		$customer.setBankAccount($bankAccount);
+		insert($customer);
+end
+
+rule "3.c Persons under 25 yrs. that are students pay 40% of the calculated fee"
+	when
+		$customer : PrivateCustomer(calculateAge()<25 && jobState==JobState.STUDENT) 
+	then
+		BankAccount $bankAccount = $customer.getBankAccount();
+		$bankAccount.setCostPerMonth($bankAccount.getCostPerMonth()*0.4);
+		$customer.setBankAccount($bankAccount);
+		insert($customer);
+end
+
