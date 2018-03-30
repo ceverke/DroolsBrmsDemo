@@ -42,8 +42,7 @@ rule "1.c Customer needs gold card; additional charge 9.90 Euro per month"
 		BankAccount $bankAccount = $customer.getBankAccount();
 		$bankAccount.setCostPerMonth($bankAccount.getCostPerMonth() + 9.9);
 		$customer.setBankAccount($bankAccount);
-		insert($customer);
-		
+		insert($customer);		
 end
 
 rule "2.a Customer is employee, overdraft limit is 10% of the monthly salary (with an interest of 10.9%)"
